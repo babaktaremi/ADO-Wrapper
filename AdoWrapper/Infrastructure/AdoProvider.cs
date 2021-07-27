@@ -1,33 +1,28 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
+//using System.Data.SqlClient;
 using System.Threading.Tasks;
-using System.Transactions;
 using AdoWrapper.Contracts;
 using AdoWrapper.Extensions;
 using AdoWrapper.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 
 namespace AdoWrapper.Infrastructure
 {
-   internal class AdoProvider:IAdoProvider
-   {
-      
-       private readonly IOptions<ConnectionStringModel> _connectionStringModel;
+    internal class AdoProvider : IAdoProvider
+    {
+        private readonly IOptions<ConnectionStringModel> _connectionStringModel;
 
-       public AdoProvider(IOptions<ConnectionStringModel> connectionStringModel)
-       {
-           _connectionStringModel = connectionStringModel;
-       }
-
-        public T GetValueOrDefault<T>(string sql) where T:class,new()
+        public AdoProvider(IOptions<ConnectionStringModel> connectionStringModel)
         {
-            var result = new T();
-            var properties = result.GetProperties();
+            _connectionStringModel = connectionStringModel;
+        }
+
+        public T GetFirstOrDefault<T>(string sql) where T : class, new()
+        {
+            var result = default(T);
+            var properties = TypeExtensions.GetWritableProperties<T>();
 
             using SqlConnection connection = new SqlConnection(_connectionStringModel.Value.ConnectionString);
             using SqlCommand command = new SqlCommand(sql, connection);
@@ -36,43 +31,49 @@ namespace AdoWrapper.Infrastructure
 
             using SqlDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
 
-            while (reader.Read())
+            if (reader.Read())
             {
+                result = new T();
                 foreach (var property in properties)
                 {
-                   result.FillProperty(property.Key,reader.GetValue(reader.GetOrdinal(property.Key))); 
+                    var value = reader.GetValue(reader.GetOrdinal(property.Name));
+                    property.SetValue(result, value);
                 }
             }
 
             return result;
         }
 
-        public async Task<T> GetValueOrDefaultAsync<T>(string sql) where T : class, new()
+        public async Task<T> GetFirstOrDefaultAsync<T>(string sql) where T : class, new()
         {
-            var result = new T();
-            var properties = result.GetProperties();
+            var result = default(T);
+            var properties = TypeExtensions.GetWritableProperties<T>();
 
             await using SqlConnection connection = new SqlConnection(_connectionStringModel.Value.ConnectionString);
             await using SqlCommand command = new SqlCommand(sql, connection);
 
-            connection.Open();
+            await connection.OpenAsync().ConfigureAwait(false);
 
-            await using SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            await using SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
 
-            while (reader.Read())
+            if (await reader.ReadAsync().ConfigureAwait(false))
             {
+                result = new T();
+
                 foreach (var property in properties)
                 {
-                    result.FillProperty(property.Key,await reader.GetFieldValueAsync<object>(reader.GetOrdinal(property.Key)));
+                    var value = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(property.Name)).ConfigureAwait(false);
+                    property.SetValue(result, value);
                 }
             }
 
             return result;
         }
 
-        public List<T> GetValuesOrDefault<T>(string sql) where T : class, new()
+        public List<T> GetList<T>(string sql) where T : class, new()
         {
-            var result= new List<T>();
+            var properties = TypeExtensions.GetWritableProperties<T>();
+            var result = new List<T>();
 
             using SqlConnection connection = new SqlConnection(_connectionStringModel.Value.ConnectionString);
             using SqlCommand command = new SqlCommand(sql, connection);
@@ -84,11 +85,11 @@ namespace AdoWrapper.Infrastructure
             while (reader.Read())
             {
                 var temp = new T();
-                var properties = temp.GetProperties();
 
                 foreach (var property in properties)
                 {
-                    temp.FillProperty(property.Key, reader.GetValue(reader.GetOrdinal(property.Key)));
+                    var value = reader.GetValue(reader.GetOrdinal(property.Name));
+                    property.SetValue(temp, value);
                 }
 
                 result.Add(temp);
@@ -97,37 +98,32 @@ namespace AdoWrapper.Infrastructure
             return result;
         }
 
-        public async Task<List<T>> GetValuesOrDefaultAsync<T>(string sql) where T : class, new()
+        public async Task<List<T>> GetListAsync<T>(string sql) where T : class, new()
         {
+            var properties = TypeExtensions.GetWritableProperties<T>();
             var result = new List<T>();
 
             await using SqlConnection connection = new SqlConnection(_connectionStringModel.Value.ConnectionString);
             await using SqlCommand command = new SqlCommand(sql, connection);
 
-            connection.Open();
+            await connection.OpenAsync().ConfigureAwait(false);
 
-            await using SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            await using SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
 
-            while (reader.Read())
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 var temp = new T();
-                var properties = temp.GetProperties();
 
                 foreach (var property in properties)
                 {
-                    temp.FillProperty(property.Key, await reader.GetFieldValueAsync<object>(reader.GetOrdinal(property.Key)));
+                    var value = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(property.Name)).ConfigureAwait(false);
+                    property.SetValue(temp, value);
                 }
 
                 result.Add(temp);
             }
 
             return result;
-        }
-
-
-        public void Dispose()
-        {
-            
         }
     }
 }
