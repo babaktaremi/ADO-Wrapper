@@ -88,7 +88,7 @@ namespace AdoWrapper.Infrastructure
 
                 foreach (var property in properties)
                 {
-                    var value = reader.GetValue(reader.GetOrdinal(property.Name));
+                    var value = reader.GetFieldValue<object>(reader.GetOrdinal(property.Name));
                     property.SetValue(temp, value);
                 }
 

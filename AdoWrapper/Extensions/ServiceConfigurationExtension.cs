@@ -16,7 +16,7 @@ namespace AdoWrapper.Extensions
         public static IServiceCollection AddAdoWrapper(this IServiceCollection services, string connectionString)
         {
             services.Configure<ConnectionStringModel>(o => o.ConnectionString = connectionString);
-            services.AddScoped<IAdoProvider, AdoProvider>();
+            services.AddSingleton<IAdoProvider, AdoProvider>();
             return services;
         }
     }
