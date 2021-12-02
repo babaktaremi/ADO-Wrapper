@@ -152,13 +152,8 @@ namespace AdoWrapper.Infrastructure
                 }
 
                 if (result.Contains(temp))
-                {
-
-                  var oldTemp= result.Find(c => c.Equals(temp));
-                  result.Remove(oldTemp);
-                  result.Add(temp);
                     continue;
-                }
+                
 
                 result.Add(temp);
             }
