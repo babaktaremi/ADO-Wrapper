@@ -20,7 +20,7 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAdoWrapper("Data Source=localhost;Initial Catalog=AdoTest;Integrated Security=true");
+            services.AddAdoWrapper("Data Source=localhost;Initial Catalog=BooksDb;Integrated Security=true;TrustServerCertificate=true");
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

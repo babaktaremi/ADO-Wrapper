@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AdoWrapper.Contracts
@@ -27,7 +28,7 @@ namespace AdoWrapper.Contracts
         /// <typeparam name="T">Result to be returned</typeparam>
         /// <param name="sql">sql query</param>
         /// <returns></returns>
-        List<T> GetList<T>(string sql) where T : class, new();
+        List<T> GetList<T>(string sql) where T : class, IEquatable<T>, new();
 
         /// <summary>
         /// Gets A list of Result in a query as an asynchronous operation
@@ -35,6 +36,6 @@ namespace AdoWrapper.Contracts
         /// <typeparam name="T"></typeparam>
         /// <param name="sql"></param>
         /// <returns></returns>
-        Task<List<T>> GetListAsync<T>(string sql) where T : class, new();
+        Task<List<T>> GetListAsync<T>(string sql) where T : class, IEquatable<T>, new();
     }
 }
