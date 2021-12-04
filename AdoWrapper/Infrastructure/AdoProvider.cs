@@ -34,11 +34,54 @@ namespace AdoWrapper.Infrastructure
 
             using SqlDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
 
-            if (reader.Read())
+            var listProperties = TypeExtensions.GetListProperties<T>();
+
+            while (reader.Read())
             {
                 result = new T();
                 foreach (var property in properties)
                 {
+
+                    if (property.IsClassProperty())
+                    {
+                        if (property.IsPropertyGenericList())
+                        {
+                            var innerProperty = property.GetGenericArgument();
+
+                            var obj = Activator.CreateInstance(innerProperty);
+
+                            var list = listProperties.FirstOrDefault(c => c.GetType() == property.PropertyType);
+
+                            var objProperties = obj.GetWritableProperties();
+
+                            foreach (var prop in objProperties)
+                            {
+                                var val = reader.GetFieldValue<object>(reader.GetOrdinal(prop.Name));
+                                prop.SetValue(obj, val);
+                            }
+
+                            list.Add(obj);
+
+                            property.SetValue(result, list);
+
+                        }
+                        else
+                        {
+                            var obj = Activator.CreateInstance(property.PropertyType);
+
+                            var objProperties = obj.GetWritableProperties();
+
+                            foreach (var prop in objProperties)
+                            {
+                                var val = reader.GetFieldValue<object>(reader.GetOrdinal(prop.Name));
+                                prop.SetValue(obj, val);
+                            }
+
+                            property.SetValue(result,obj);
+                        }
+
+                        continue;
+                    }
                     var value = reader.GetValue(reader.GetOrdinal(property.Name));
                     property.SetValue(result, value);
                 }
@@ -59,12 +102,56 @@ namespace AdoWrapper.Infrastructure
 
             await using SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
 
-            if (await reader.ReadAsync().ConfigureAwait(false))
+            var listProperties = TypeExtensions.GetListProperties<T>();
+
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 result = new T();
 
                 foreach (var property in properties)
                 {
+                    if (property.IsClassProperty())
+                    {
+                        if (property.IsPropertyGenericList())
+                        {
+                            var innerProperty = property.GetGenericArgument();
+
+                            var obj = Activator.CreateInstance(innerProperty);
+
+                            var list = listProperties.FirstOrDefault(c => c.GetType() == property.PropertyType);
+
+                            var objProperties = obj.GetWritableProperties();
+
+                            foreach (var prop in objProperties)
+                            {
+                                var val =await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
+                                prop.SetValue(obj, val);
+                            }
+
+                            list.Add(obj);
+
+                            property.SetValue(result, list);
+
+                        }
+
+                        else
+                        {
+                            var obj = Activator.CreateInstance(property.PropertyType);
+
+                            var objProperties = obj.GetWritableProperties();
+
+                            foreach (var prop in objProperties)
+                            {
+                                var val =await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
+                                prop.SetValue(obj, val);
+                            }
+
+                            property.SetValue(result, obj);
+                        }
+
+                        continue;
+                    }
+
                     var value = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(property.Name)).ConfigureAwait(false);
                     property.SetValue(result, value);
                 }
@@ -85,19 +172,78 @@ namespace AdoWrapper.Infrastructure
 
             using SqlDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
 
+            var listProperties = TypeExtensions.GetListProperties<T>();
+
             while (reader.Read())
             {
                 var temp = new T();
 
                 foreach (var property in properties)
                 {
+                    if (property.IsClassProperty())
+                    {
+                        if (property.IsPropertyGenericList())
+                        {
+                            var innerProperty = property.GetGenericArgument();
+
+                            var obj = Activator.CreateInstance(innerProperty);
+
+                            var list = listProperties.FirstOrDefault(c => c.GetType() == property.PropertyType);
+
+                            var objProperties = obj.GetWritableProperties();
+
+                            foreach (var prop in objProperties)
+                            {
+                                var val = reader.GetFieldValue<object>(reader.GetOrdinal(prop.Name));
+                                prop.SetValue(obj, val);
+                            }
+
+                            list.Add(obj);
+
+                            var tempList = Activator.CreateInstance(property.PropertyType) as IList;
+
+                            foreach (var item in list)
+                            {
+                                var foreignKeyValue = item.GetForeignKeyValue();
+                                var parentPrimaryKey = item.GetPrimaryKeyValueFromChildEntity(temp);
+
+                                if (foreignKeyValue.Equals(parentPrimaryKey))
+                                    tempList.Add(item);
+                            }
+
+                            property.SetValue(temp, tempList);
+
+                        }
+                        else
+                        {
+                            var obj = Activator.CreateInstance(property.PropertyType);
+
+                            var objProperties = obj.GetWritableProperties();
+
+                            foreach (var prop in objProperties)
+                            {
+                                var val =  reader.GetFieldValue<object>(reader.GetOrdinal(prop.Name));
+                                prop.SetValue(obj, val);
+                            }
+
+                            property.SetValue(result, obj);
+                        }
+
+                        continue;
+                    }
+
                     var value = reader.GetFieldValue<object>(reader.GetOrdinal(property.Name));
                     property.SetValue(temp, value);
                 }
 
+                if (result.Contains(temp))
+                {
+                    result.Remove(temp);
+                    result.Add(temp);
+                    continue;
+                }
                 result.Add(temp);
             }
-
             return result;
         }
 
@@ -111,13 +257,13 @@ namespace AdoWrapper.Infrastructure
             await connection.OpenAsync().ConfigureAwait(false);
 
             await using SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
-            
+
             var listProperties = TypeExtensions.GetListProperties<T>();
-            
+
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 var temp = new T();
-                
+
                 foreach (var property in properties)
                 {
                     if (property.IsClassProperty())
@@ -130,7 +276,6 @@ namespace AdoWrapper.Infrastructure
 
                             var list = listProperties.FirstOrDefault(c => c.GetType() == property.PropertyType);
 
-
                             var objProperties = obj.GetWritableProperties();
 
                             foreach (var prop in objProperties)
@@ -141,9 +286,36 @@ namespace AdoWrapper.Infrastructure
 
                             list.Add(obj);
 
-                            property.SetValue(temp, list);
+                            var tempList = Activator.CreateInstance(property.PropertyType) as IList;
+
+                            foreach (var item in list)
+                            {
+                                var foreignKeyValue = item.GetForeignKeyValue();
+                                var parentPrimaryKey = item.GetPrimaryKeyValueFromChildEntity(temp);
+
+                                if (foreignKeyValue.Equals(parentPrimaryKey))
+                                    tempList.Add(item);
+                            }
+
+                            property.SetValue(temp, tempList);
 
                         }
+
+                        else
+                        {
+                            var obj = Activator.CreateInstance(property.PropertyType);
+
+                            var objProperties = obj.GetWritableProperties();
+
+                            foreach (var prop in objProperties)
+                            {
+                                var val =await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
+                                prop.SetValue(obj, val);
+                            }
+
+                            property.SetValue(result, obj);
+                        }
+
                         continue;
                     }
 
@@ -152,8 +324,13 @@ namespace AdoWrapper.Infrastructure
                 }
 
                 if (result.Contains(temp))
+                {
+                    result.Remove(temp);
+                    result.Add(temp);
                     continue;
-                
+                }
+
+
 
                 result.Add(temp);
             }

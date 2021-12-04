@@ -36,6 +36,15 @@ namespace AdoWrapper.Extensions
             });
         }
 
+        internal static List<PropertyInfo> GetWritableProperties(this Type type)
+        {
+            return TypeProperties.GetOrAdd(type, _ =>
+            {
+                return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    //Only writable properties
+                    .Where(p => p.GetSetMethod() is not null).ToList();
+            });
+        }
 
         internal static bool IsClassProperty(this PropertyInfo property)
         {
@@ -59,6 +68,32 @@ namespace AdoWrapper.Extensions
 
             var result = properties.Select(propertyInfo => Activator.CreateInstance(propertyInfo.PropertyType) as IList).ToList();
             return result;
+        }
+
+        internal static object GetForeignKeyValue(this object obj)
+        {
+            var properties = obj.GetType().GetWritableProperties();
+
+            object foreignKeyProperty = (from property in properties where property.GetCustomAttributes(typeof(ForeignKeyNavigation), false).Count() != 0 select property.GetValue(obj, null)).FirstOrDefault();
+            return foreignKeyProperty;
+        }
+
+        internal static object GetPrimaryKeyValueFromChildEntity(this object childEntity, object secondEntity)
+        {
+            var properties = childEntity.GetWritableProperties();
+            object parentPropertyValue = default;
+            foreach (var propertyInfo in properties)
+            {
+                var attribute = propertyInfo.GetCustomAttribute<ForeignKeyNavigation>();
+                if (attribute is not null)
+                {
+                    var propertyName = attribute.ForeignKeyName;
+                    parentPropertyValue = secondEntity.GetType().GetProperty(propertyName)?.GetValue(secondEntity, null);
+                    break;
+                }
+            }
+
+            return parentPropertyValue;
         }
     }
 }
