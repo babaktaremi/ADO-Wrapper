@@ -72,5 +72,39 @@ namespace Web.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("SimpleAuthorListAsync")]
+        public async Task<IActionResult> GetSimpleAuthorListAsync()
+        {
+            var result = await
+                _ado.GetListAsync<SimpleAuthor>(
+                    "Select * from Authors");
+
+            return Ok(result);
+        }
+
+        [HttpGet("SimpleAuthorList")]
+        public  IActionResult GetSimpleAuthorList()
+        {
+            var result = 
+                _ado.GetList<SimpleAuthor>(
+                    "Select * from Authors");
+
+            return Ok(result);
+        }
+
+        [HttpGet("SimpleSingleAuthor")]
+        public IActionResult GetSimpleSingleAuthor()
+        {
+            var result = _ado.GetFirstOrDefault<SimpleAuthor>("Select top(1) * from Authors Order By Authors.ID desc");
+            return Ok(result);
+        }
+
+        [HttpGet("SimpleSingleAuthorAsync")]
+        public async Task<IActionResult> GetSimpleSingleAuthorAsync()
+        {
+            var result =await _ado.GetFirstOrDefaultAsync<SimpleAuthor>("Select top(1) * from Authors Order By Authors.ID desc");
+            return Ok(result);
+        }
     }
 }

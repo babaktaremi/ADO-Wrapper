@@ -8,6 +8,7 @@
     <PackageProjectUrl>https://github.com/babaktaremi/ADO-Wrapper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/babaktaremi/ADO-Wrapper</RepositoryUrl>
     <PackageIcon>ADO.NET.png</PackageIcon>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
