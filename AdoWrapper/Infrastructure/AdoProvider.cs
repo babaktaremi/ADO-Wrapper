@@ -77,7 +77,7 @@ namespace AdoWrapper.Infrastructure
                                 prop.SetValue(obj, val);
                             }
 
-                            property.SetValue(result,obj);
+                            property.SetValue(result, obj);
                         }
 
                         continue;
@@ -124,7 +124,7 @@ namespace AdoWrapper.Infrastructure
 
                             foreach (var prop in objProperties)
                             {
-                                var val =await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
+                                var val = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
                                 prop.SetValue(obj, val);
                             }
 
@@ -142,7 +142,7 @@ namespace AdoWrapper.Infrastructure
 
                             foreach (var prop in objProperties)
                             {
-                                var val =await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
+                                var val = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
                                 prop.SetValue(obj, val);
                             }
 
@@ -222,7 +222,7 @@ namespace AdoWrapper.Infrastructure
 
                             foreach (var prop in objProperties)
                             {
-                                var val =  reader.GetFieldValue<object>(reader.GetOrdinal(prop.Name));
+                                var val = reader.GetFieldValue<object>(reader.GetOrdinal(prop.Name));
                                 prop.SetValue(obj, val);
                             }
 
@@ -233,7 +233,7 @@ namespace AdoWrapper.Infrastructure
                     }
 
                     var value = reader.GetFieldValue<object>(reader.GetOrdinal(property.Name));
-                    property.SetValue(temp, value);
+                    property.SetValue(temp, value is DBNull ? default : value);
                 }
 
                 if (result.Contains(temp))
@@ -309,7 +309,7 @@ namespace AdoWrapper.Infrastructure
 
                             foreach (var prop in objProperties)
                             {
-                                var val =await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
+                                var val = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
                                 prop.SetValue(obj, val);
                             }
 
@@ -320,7 +320,8 @@ namespace AdoWrapper.Infrastructure
                     }
 
                     var value = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(property.Name)).ConfigureAwait(false);
-                    property.SetValue(temp, value);
+
+                    property.SetValue(temp, value is DBNull ? default : value);
                 }
 
                 if (result.Contains(temp))
