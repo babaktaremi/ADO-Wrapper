@@ -160,7 +160,7 @@ namespace AdoWrapper.Infrastructure
             return result;
         }
 
-        public List<T> GetList<T>(string sql) where T : class, IEquatable<T>, new()
+        public List<T> GetList<T>(string sql, bool usingNavigation = true) where T : class, IEquatable<T>, new()
         {
             var properties = TypeExtensions.GetWritableProperties<T>();
             var result = new List<T>();
@@ -236,7 +236,7 @@ namespace AdoWrapper.Infrastructure
                     property.SetValue(temp, value is DBNull ? default : value);
                 }
 
-                if (result.Contains(temp))
+                if (result.Contains(temp) && usingNavigation)
                 {
                     result.Remove(temp);
                     result.Add(temp);
@@ -247,7 +247,7 @@ namespace AdoWrapper.Infrastructure
             return result;
         }
 
-        public async Task<List<T>> GetListAsync<T>(string sql) where T : class, IEquatable<T>, new()
+        public async Task<List<T>> GetListAsync<T>(string sql, bool usingNavigation = true) where T : class, IEquatable<T>, new()
         {
             var properties = TypeExtensions.GetWritableProperties<T>();
             var result = new List<T>();
@@ -324,7 +324,7 @@ namespace AdoWrapper.Infrastructure
                     property.SetValue(temp, value is DBNull ? default : value);
                 }
 
-                if (result.Contains(temp))
+                if (result.Contains(temp) && usingNavigation)
                 {
                     result.Remove(temp);
                     result.Add(temp);

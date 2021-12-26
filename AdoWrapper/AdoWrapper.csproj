@@ -4,11 +4,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <Authors>Babak Taremi</Authors>
     <Company>Babak Taremi</Company>
-    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <AssemblyVersion>0.2.0</AssemblyVersion>
     <PackageProjectUrl>https://github.com/babaktaremi/ADO-Wrapper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/babaktaremi/ADO-Wrapper</RepositoryUrl>
     <PackageIcon>ADO.NET.png</PackageIcon>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
+    <Description>A simple readonly wrapper for ado to make it easy to use</Description>
   </PropertyGroup>
 
   <ItemGroup>

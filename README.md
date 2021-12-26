@@ -10,7 +10,11 @@
 - uses ADO Net. 
 - Supports Navigation Properties (up to one level at the moment)
 
-**Installation**
+### Updates
+- 0.2.0 : A Bug in ```DBNULL``` values has been fixed. Null Values are now assigned to their default values
+- 0.3.0 : Navigation Properties are now optional. ```UsingNavigation``` flag added to ```GetList``` and ```GetListAsync``` methods. default is ```true```. Set it to false wherever you need
+
+### Installation
 Using Package Manager Console:
 
 `Install-Package AdoWrapper -Version 0.1.0`
@@ -19,7 +23,7 @@ Using NET CLI:
 
 `dotnet add package AdoWrapper --version 0.1.0`
 
-**Setting Up**
+### Setting Up
 
 If you are using good old Startup.cs, add The following code to Startup.cs class in ConfigureServices method:
 
@@ -47,7 +51,7 @@ public class BookController : ControllerBase
 	}
 ```
 
-**Methods**
+### Methods
 
 ADO wrapper has two main methods:
 
@@ -114,7 +118,7 @@ the result would look something just like this:
   "authorName": "Ali"
 }
 ```
-**Using navigation properties**
+### Using navigation properties
 
 ADO wrapper works best when you intend to use it for flat and denormalized data. however you can have navigation properties as well (up to one level at the moment).
 There are two marker attributes that you should use in your classes called `[ForeignKeyNavigation]` and `[ForeignNavigation]` .
@@ -277,9 +281,9 @@ the result would look something like this:
 ```
 keep in mind that you don't need to specify a property as foreign key using  `[ForeignKeyNavigation]` attribute in this situation. But it's a good practice to do so.
 
-**WARNING ⚠️**
+### WARNING ⚠️
 Currently ADO wrapper does not provide you protection against SQL injection attacks. So I recommend you not to use string interpolation as SQL query and parametrize your parameters before hand.
 
-**your help is greatly appreciated !**
+### your help is greatly appreciated !
 Currently ADO wrapper is in early stages. I have plans to make it better and do some optimizations on it. You can help me by creating PRs or creating issues on this repository and I'll check them as soon as I can!
 If you like this library you can give it a star as well.

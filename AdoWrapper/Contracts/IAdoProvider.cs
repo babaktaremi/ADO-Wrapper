@@ -23,19 +23,21 @@ namespace AdoWrapper.Contracts
         Task<T> GetFirstOrDefaultAsync<T>(string sql) where T : class, new();
 
         /// <summary>
-        /// Gets A list of Result in a query
+        ///  Gets A list of Result in a query
         /// </summary>
-        /// <typeparam name="T">Result to be returned</typeparam>
-        /// <param name="sql">sql query</param>
+        /// <typeparam name="T">This List to be returned</typeparam>
+        /// <param name="sql">the sql query</param>
+        /// <param name="usingNavigation">a flag indicating whether the data should be flat or using navigation properties. Default is set to true</param>
         /// <returns></returns>
-        List<T> GetList<T>(string sql) where T : class, IEquatable<T>, new();
+        List<T> GetList<T>(string sql,bool usingNavigation=true) where T : class, IEquatable<T>, new();
 
         /// <summary>
-        /// Gets A list of Result in a query as an asynchronous operation
+        ///  Gets A list of Result in a query as asynchronous operation
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sql"></param>
+        /// <typeparam name="T">This List to be returned</typeparam>
+        /// <param name="sql">the sql query</param>
+        /// <param name="usingNavigation">a flag indicating whether the data should be flat or using navigation properties. Default is set to true</param>
         /// <returns></returns>
-        Task<List<T>> GetListAsync<T>(string sql) where T : class, IEquatable<T>, new();
+        Task<List<T>> GetListAsync<T>(string sql,bool usingNavigation=true) where T : class, IEquatable<T>, new();
     }
 }
