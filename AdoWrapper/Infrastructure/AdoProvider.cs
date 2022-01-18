@@ -36,7 +36,11 @@ namespace AdoWrapper.Infrastructure
 
             var listProperties = TypeExtensions.GetListProperties<T>();
 
-            while (reader.Read())
+            //The original version of this method runs to the last record and returns the last item, in fact, LastOrDefault
+
+            bool anyRecordReaded = false;
+
+            while (reader.Read() && !anyRecordReaded )
             {
                 result = new T();
                 foreach (var property in properties)
@@ -85,9 +89,12 @@ namespace AdoWrapper.Infrastructure
                     var value = reader.GetValue(reader.GetOrdinal(property.Name));
                     property.SetValue(result, value);
                 }
+                anyRecordReaded = true;
             }
 
             return result;
+
+          //  return this.GetFirstOrDefaultAsync<T>(sql).Result;
         }
 
         public async Task<T> GetFirstOrDefaultAsync<T>(string sql) where T : class, new()
@@ -103,8 +110,10 @@ namespace AdoWrapper.Infrastructure
             await using SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
 
             var listProperties = TypeExtensions.GetListProperties<T>();
+            //The original version of this method runs to the last record and returns the last item, in fact, LastOrDefault
 
-            while (await reader.ReadAsync().ConfigureAwait(false))
+            bool anyRecordReaded = false;
+            while (await reader.ReadAsync().ConfigureAwait(false) && !anyRecordReaded)
             {
                 result = new T();
 
@@ -155,6 +164,8 @@ namespace AdoWrapper.Infrastructure
                     var value = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(property.Name)).ConfigureAwait(false);
                     property.SetValue(result, value);
                 }
+
+                anyRecordReaded = true;
             }
 
             return result;
