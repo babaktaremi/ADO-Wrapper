@@ -16,24 +16,26 @@ namespace AdoWrapper.Extensions
         {
             var type = typeof(T);
 
-            return TypeProperties.GetOrAdd(type, _ =>
-            {
-                return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    //Only writable properties
-                    .Where(p => p.GetSetMethod() is not null).ToList();
-            });
+            // return TypeProperties.GetOrAdd(type, _ =>
+            // {
+            //     return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            //         //Only writable properties
+            //         .Where(p => p.GetSetMethod() is not null).ToList();
+            // });
+            return GetWritableProperties(type);
         }
 
         internal static List<PropertyInfo> GetWritableProperties(this object obj)
         {
             var type = obj.GetType();
 
-            return TypeProperties.GetOrAdd(type, _ =>
-            {
-                return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    //Only writable properties
-                    .Where(p => p.GetSetMethod() is not null).ToList();
-            });
+            // return TypeProperties.GetOrAdd(type, _ =>
+            // {
+            //     return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            //         //Only writable properties
+            //         .Where(p => p.GetSetMethod() is not null).ToList();
+            // });
+            return GetWritableProperties(type);
         }
 
         internal static List<PropertyInfo> GetWritableProperties(this Type type)
